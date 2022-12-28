@@ -1,7 +1,7 @@
 import chess as ch
 import random as rd
 
-class Engine:
+class Engine2:
     def __init__(self, board, maxDepth):
         self.board=board
         self.color= board.turn

@@ -3,7 +3,8 @@ import sys
 from game import *
 from const import *
 from time import sleep, time
-import ChessEngine
+from ChessEngine import Engine2
+from chess_engine import Engine
 from ai import AI
 import time
 class Main:
@@ -23,13 +24,17 @@ class Main:
         dragger = self.game.dragger
         board = game.board
         
-    
+
+        # test
+        
+        
          
         # Qb3 Qf6
         # e5 Qg6
         # Re1 Nge7
         
-        engine = AI(4)   
+        engine = AI(3) 
+          
         running = True
         
         play = False
@@ -54,29 +59,33 @@ class Main:
             game.show_pieces(screen)
             
             
-            # if play:
-                
+            # if not play:
+    
             #     pygame.display.flip()
                 
             #     try:
-            #         board.push(engine.calculate_ab(3))
+            #         # engine1 = Engine(board.fen())
+            #         # board.push(engine1.calculate_ab(4))
+            #         # board.push(engine.calculate_ab(board.fen()))
 
             #     except:
             #         print("xxxx")
                 
                 
-                
-            #     play = False
+            #     play = True
             
             if play:
                 # engine = ChessEngine.Engine(board, 3) 
                 # board.push(engine.getBestMove())
                 pygame.display.flip()
                 try:
-                    board.push(engine.calculate_ab(board))
+                    # engine2 = Engine2(board, 4)
+                    # board.push(engine2.engine(None, 0))
+                    board.push(engine.calculate_ab(board.fen()))
+        
 
                 except:
-                    print("xxxx")
+                    print("except")
                 play = False
             
             
@@ -192,7 +201,6 @@ class Main:
                     
                     if move in game.legal_move_from_square():
 
-            
                         # #en passant capture
                         game.play_sound(True)
                         board.push(move)
