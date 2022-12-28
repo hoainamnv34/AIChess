@@ -15,7 +15,7 @@ class AI:
             # knight
             2:330,
             # bishop
-            3:330,
+            3:320,
             # rook
             4:510,
             # queen
@@ -29,7 +29,7 @@ class AI:
             1: [
                 0, 0, 0, 0, 0, 0, 0, 0,
                 50, 50, 50, 50, 50, 50, 50, 50,
-                10, 10, 20, 30, 30, 20, 10, 10,
+                15, 15, 25, 35, 35, 25, 15, 15,
                 5, 5, 10, 25, 25, 10, 5, 5,
                 0, 0, 0, 20, 20, 0, 0, 0,
                 5, -5, -10, 0, 0, -10, -5, 5,
@@ -112,16 +112,16 @@ class AI:
         
         
         #pawn Structure
-        self.DOUBLED_PAWN_PENALTY      = 10
-        self.ISOLATED_PAWN_PENALTY     = 20
-        self.BACKWARDS_PAWN_PENALTY    = 10
-        self.PASSED_PAWN_BONUS         = 30
+        self.DOUBLED_PAWN_PENALTY      = 8
+        self.ISOLATED_PAWN_PENALTY     = 15
+        self.BACKWARDS_PAWN_PENALTY    = 5
+        self.PASSED_PAWN_BONUS         = 20
         
         #evaluation of piece
         self.ROOK_SEMI_OPEN_FILE_BONUS = 15
         self.ROOK_OPEN_FILE_BONUS      = 20
         self.ROOK_ON_SEVENTH_BONUS     = 20
-        self.ROOK_BLOCKED_BY_UNCASTLED_KING_PENALTY = 30
+        self.ROOK_BLOCKED_BY_UNCASTLED_KING_PENALTY = 15
         self.QUEEEN_EEARLY_DEVELOPMENT_PENALTY = 20
         self.BAD_BISHOP_PENALTY = 10
         self.KING_HAS_CASTLING_RIGHT_BUNUS = 10
@@ -268,10 +268,10 @@ class AI:
         if i == chess.KNIGHT:
             # Decreasing value as pawns disappear
             if color == chess.WHITE and not self.board.pieces(chess.PAWN, chess.WHITE):
-                score -= self.piece_values[2]*0.05
+                score -= self.piece_values[2]*0.04
                 
             if color == chess.BLACK and not self.board.pieces(chess.PAWN, chess.BLACK):
-                score += self.piece_values[2]*0.05
+                score += self.piece_values[2]*0.04
         
         #with bishop piece
         if i == chess.BISHOP:
@@ -332,10 +332,10 @@ class AI:
                 
             #Increasing value as pawns disappear
             if color == chess.WHITE and not self.board.pieces(chess.PAWN, chess.BLACK):
-                score += self.piece_values[4]*0.05
+                score += self.piece_values[4]*0.04
                 
             if color == chess.BLACK and not self.board.pieces(chess.PAWN, chess.WHITE):
-                score -= self.piece_values[4]*0.05
+                score -= self.piece_values[4]*0.04
                 
                 
             # Penalty for a rook that is blocked by an uncastled king
@@ -410,7 +410,7 @@ class AI:
         squares = chess.SquareSet(occupied_squares)
         for square in squares:
             piece = self.board.piece_at(square)
-            score += (self.material_eval(piece) 
+            score += (1.03*self.material_eval(piece) 
                       + self.piece_square_eval(square,piece, piece_count)
                       
                       + self.piece_eval(square, piece)
@@ -475,14 +475,14 @@ class AI:
             # chuwa hieu
             
             # put the last calculated best move in first place of the list. Hopefully this improves pruning.
-            # if prev_moves and len(prev_moves) >= depth:
-            #     if depth == 4 and not self.board.turn:
-            #         print(prev_moves[depth - 1])
-            #     if prev_moves[depth - 1] in moves:
-            #     # if prev_moves[depth - 1] in self.board.legal_moves:
-            #         # if not self.board.turn:
-            #         #     print(prev_moves[depth - 1])
-            #         moves.insert(0, prev_moves[depth - 1])
+            if prev_moves and len(prev_moves) >= depth:
+                if depth == 4 and not self.board.turn:
+                    print(prev_moves[depth - 1])
+                if prev_moves[depth - 1] in moves:
+                # if prev_moves[depth - 1] in self.board.legal_moves:
+                    # if not self.board.turn:
+                    #     print(prev_moves[depth - 1])
+                    moves.insert(0, prev_moves[depth - 1])
 
 
             if maximiser:
