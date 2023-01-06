@@ -111,13 +111,12 @@ class AI:
         }
         
         
-        #pawn Structure
-        self.DOUBLED_PAWN_PENALTY      = 8
-        self.ISOLATED_PAWN_PENALTY     = 15
-        self.BACKWARDS_PAWN_PENALTY    = 5
-        self.PASSED_PAWN_BONUS         = 20
+        
         
         #evaluation of piece
+        self.DOUBLED_PAWN_PENALTY      = 8
+        self.ISOLATED_PAWN_PENALTY     = 15
+        self.PASSED_PAWN_BONUS         = 20
         self.ROOK_SEMI_OPEN_FILE_BONUS = 15
         self.ROOK_OPEN_FILE_BONUS      = 20
         self.ROOK_ON_SEVENTH_BONUS     = 20
@@ -180,27 +179,27 @@ class AI:
             neighbors = [1]
         else:
             neighbors = [a-1, a+1]
-        
-            
+    
         return neighbors
             
 
     def mobility_eval(self):
         score = 0
-        board_copy = chess.Board()
-        board_copy.set_fen(self.board.fen())
-        board_copy.turn = not self.board.turn
+        # board_copy = chess.Board()
+        # board_copy.set_fen(self.board.fen())
+        # board_copy.turn = not self.board.turn
         
         if (self.board.turn == chess.WHITE):
-            score =  board_copy.legal_moves.count()
+            score = -self.board.legal_moves.count()
         else:
-            score = -board_copy.legal_moves.count()
+            score = self.board.legal_moves.count()
+            
         
         #to make develop in the first moves
-        if (self.board.fullmove_number<10):
+        if (self.board.fullmove_number < 10):
             return score
         else:
-            return score*1/3
+            return score*1/4
 
 
     def piece_eval(self, square, piece):
@@ -245,10 +244,10 @@ class AI:
             files  = adjacent_files
             files.append(file)
             is_passed = True
+            enemy_piece = chess.Piece(chess.PAWN, not color)
             for f in files:
                 for r in range(rank + 1, 7) if color == chess.WHITE else range(1, rank):
                     p = self.board.piece_at(chess.square(f, r))
-                    enemy_piece = chess.Piece(chess.PAWN, not color)
                     if p == enemy_piece:
                         is_passed = False
                         break
@@ -260,9 +259,6 @@ class AI:
                 temp = +self.PASSED_PAWN_BONUS if color == chess.WHITE else -self.PASSED_PAWN_BONUS
                 score += temp     
                 
-            
-
-        
                 
         #With knight piece
         if i == chess.KNIGHT:
@@ -270,7 +266,7 @@ class AI:
             if color == chess.WHITE and not self.board.pieces(chess.PAWN, chess.WHITE):
                 score -= self.piece_values[2]*0.04
                 
-            if color == chess.BLACK and not self.board.pieces(chess.PAWN, chess.BLACK):
+            elif color == chess.BLACK and not self.board.pieces(chess.PAWN, chess.BLACK):
                 score += self.piece_values[2]*0.04
         
         #with bishop piece
@@ -278,8 +274,9 @@ class AI:
             #bad biship
             is_badBishop = False
             board_copy = chess.Board(self.board.fen()) 
-            p = chess.Piece(chess.BISHOP, not color)
-            board_copy.set_piece_at(square, p)
+            enemy_piece = chess.Piece(chess.BISHOP, not color)
+            board_copy.set_piece_at(square, enemy_piece)
+            # self.board.set_piece_at(square, enemy_piece)
             
             p_pawn = chess.Piece(chess.PAWN, color)
              
@@ -296,6 +293,9 @@ class AI:
                 # print("badbishop")
                 temp = -self.BAD_BISHOP_PENALTY if color == chess.WHITE else +self.BAD_BISHOP_PENALTY
                 score += temp
+                
+            # self.board.set_piece_at(square, piece)
+            
                     
         # With rook piece
         if i == chess.ROOK:
@@ -417,6 +417,7 @@ class AI:
                       
             )
         score += (self.mateOpportunity() + self.mobility_eval())
+        score += 0.001*random.random()
         return score
     
     
