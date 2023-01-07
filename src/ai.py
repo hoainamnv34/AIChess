@@ -4,6 +4,9 @@ import numpy
 import time
 from const import Const
 
+
+
+
 class AI:
     def __init__(self, maxDepth, board = chess.Board()) -> None:
         self.board = board
@@ -21,7 +24,7 @@ class AI:
             # queen
             5:900,
             #kind
-            6:20000
+            6:99999
         }
         
         self.piece_square_table = {
@@ -112,7 +115,6 @@ class AI:
         
         
         
-        
         #evaluation of piece
         self.DOUBLED_PAWN_PENALTY      = 8
         self.ISOLATED_PAWN_PENALTY     = 15
@@ -132,6 +134,12 @@ class AI:
         
         
         self.leaves_reached = 0
+        
+        #is last move capture
+        self.is_last_move_capture = True
+        self.last_meterial_eval = 0
+        self.last_piece_count = 0
+        
 
     
     def material_eval(self, piece):
@@ -139,7 +147,6 @@ class AI:
         i = piece.piece_type
         score = self.piece_values[i] if color == chess.WHITE else -self.piece_values[i]
         return score
-
 
     def piece_square_eval(self, square, piece, piece_count):
         color = piece.color
@@ -159,48 +166,30 @@ class AI:
             else:
                 score = -self.piece_square_table[i][square]
         return score
-    
-     
-    def mateOpportunity(self):
-        if (self.board.legal_moves.count()==0):
-            if (self.board.turn == chess.WHITE):
-                return -99999
-            else:
-                return 99999
-        else:
-            return 0
         
-    
-    def get_neighbors(self, a):
-        neighbors = []
-        if a  == 7:
-            neighbors = [6]
-        elif a == 0:
-            neighbors = [1]
-        else:
-            neighbors = [a-1, a+1]
-    
-        return neighbors
-            
-
     def mobility_eval(self):
         score = 0
-        # board_copy = chess.Board()
-        # board_copy.set_fen(self.board.fen())
-        # board_copy.turn = not self.board.turn
-        
         if (self.board.turn == chess.WHITE):
-            score = -self.board.legal_moves.count()
-        else:
             score = self.board.legal_moves.count()
+        else:
+            score = -self.board.legal_moves.count()
             
-        
         #to make develop in the first moves
         if (self.board.fullmove_number < 10):
             return score
         else:
             return score*1/4
 
+    def get_neighbors(self, a):
+            neighbors = []
+            if a  == 7:
+                neighbors = [6]
+            elif a == 0:
+                neighbors = [1]
+            else:
+                neighbors = [a-1, a+1]
+        
+            return neighbors
 
     def piece_eval(self, square, piece):
         score = 0
@@ -208,13 +197,13 @@ class AI:
         file = chess.square_file(square)
         color = piece.color
         i = piece.piece_type
-        # print(rank , file)
+        adjacent_files = self.get_neighbors(file)
+        adjacent_ranks = self.get_neighbors(rank)
         
         # With pawn piece
         if i == chess.PAWN:
         # Pawn Structure
-            adjacent_files = self.get_neighbors(file)
-            adjacent_ranks = self.get_neighbors(rank)
+            
                 
             # Check if the pawn is isolated
             is_isolated = True
@@ -255,11 +244,9 @@ class AI:
                 if not is_passed:
                     break
             if is_passed:
-                # print("passed")
-                temp = +self.PASSED_PAWN_BONUS if color == chess.WHITE else -self.PASSED_PAWN_BONUS
+                temp = self.PASSED_PAWN_BONUS if color == chess.WHITE else -self.PASSED_PAWN_BONUS
                 score += temp     
-                
-                
+                     
         #With knight piece
         if i == chess.KNIGHT:
             # Decreasing value as pawns disappear
@@ -269,18 +256,16 @@ class AI:
             elif color == chess.BLACK and not self.board.pieces(chess.PAWN, chess.BLACK):
                 score += self.piece_values[2]*0.04
         
-        #with bishop piece
+        # with bishop piece
         if i == chess.BISHOP:
             #bad biship
             is_badBishop = False
             board_copy = chess.Board(self.board.fen()) 
             enemy_piece = chess.Piece(chess.BISHOP, not color)
             board_copy.set_piece_at(square, enemy_piece)
-            # self.board.set_piece_at(square, enemy_piece)
             
             p_pawn = chess.Piece(chess.PAWN, color)
              
-            
             # Find all squares that the piece on e4 can attack
             attacked_squares = board_copy.attacks(square)
             # Convert the bitboard to a list of squares
@@ -290,13 +275,9 @@ class AI:
                     is_badBishop = True
                     break
             if is_badBishop:
-                # print("badbishop")
                 temp = -self.BAD_BISHOP_PENALTY if color == chess.WHITE else +self.BAD_BISHOP_PENALTY
                 score += temp
-                
-            # self.board.set_piece_at(square, piece)
             
-                    
         # With rook piece
         if i == chess.ROOK:
             enemyPawn = False
@@ -368,8 +349,7 @@ class AI:
                 if not between_attacks:
                     # print('rook blocked')
                     score += self.ROOK_BLOCKED_BY_UNCASTLED_KING_PENALTY
-                
-            
+                    
         # With queen
         if i == chess.QUEEN:
         # Penalty for early development
@@ -391,11 +371,7 @@ class AI:
             if self.board.has_castling_rights(chess.BLACK):
                 score -= self.KING_HAS_CASTLING_RIGHT_BUNUS
 
-
         return score
-    
-                    
-   
     
     def eval(self):
         score = 0
@@ -410,45 +386,21 @@ class AI:
         squares = chess.SquareSet(occupied_squares)
         for square in squares:
             piece = self.board.piece_at(square)
-            score += (1.03*self.material_eval(piece) 
+            score += (self.material_eval(piece) 
                       + self.piece_square_eval(square,piece, piece_count)
-                      
                       + self.piece_eval(square, piece)
                       
             )
-        score += (self.mateOpportunity() + self.mobility_eval())
+        score += self.mobility_eval()
         score += 0.001*random.random()
+
         return score
     
-    
-    # def eval(self):
-    #     score = 0
-    #     # iterate through the pieces
-    #     for i in range(1, 6):
-    #         # eval white pieces
-    #         w_squares = self.board.pieces(i, chess.WHITE)
-            
-    #         for square in w_squares:
-    #             score += self.piece_square_eval(square)
-
-    #         b_squares = self.board.pieces(i, chess.BLACK)
-            
-    #         for square in b_squares:
-    #             score -= self.piece_square_eval(square)
-
-    #     return score
-
-
-    # def eval(self):
-    #     return  self.material_eval() + self.mateOpportunity() + 0.8*self.position_eval() + self.mobility_eval() + 0.01*random.random()
-                
-                
+                          
     def alpha_beta(self, depth, move, alpha, beta, prev_moves, maximiser):
 
             move_sequence = []
-
             if depth == 0:
-                # return move, self.material_eval()
                 move_sequence.append(move)
                 return move_sequence, self.eval()
 
@@ -464,7 +416,6 @@ class AI:
                         move_sequence.append(move)
                         return move_sequence, -1000000
                 else:
-                    # print("khong phai chieu")
                     move_sequence.append(move)
                     return move_sequence, 0
 
@@ -472,29 +423,19 @@ class AI:
             # initialise best move variables. What are these used for again? I need to simplify the logic here.
             best_move = None
             best_score = -numpy.inf if maximiser else numpy.inf
-
-            # chuwa hieu
-            
-            # put the last calculated best move in first place of the list. Hopefully this improves pruning.
-            if prev_moves and len(prev_moves) >= depth:
-                if depth == 4 and not self.board.turn:
-                    print(prev_moves[depth - 1])
-                if prev_moves[depth - 1] in moves:
-                # if prev_moves[depth - 1] in self.board.legal_moves:
-                    # if not self.board.turn:
-                    #     print(prev_moves[depth - 1])
-                    moves.insert(0, prev_moves[depth - 1])
-
+ 
 
             if maximiser:
                 for move in moves:
+                    
+            
                     self.leaves_reached += 1
 
                     # get score of the new move, record what it is
                     self.board.push(move)
                     new_sequence, new_score = self.alpha_beta(depth - 1, move, alpha, beta, prev_moves, False)
                     self.board.pop()
-
+                    
                     # Check whether the new score is better than the best score. If so, replace the best score.
                     if new_score > best_score:
                         move_sequence = new_sequence
@@ -508,8 +449,8 @@ class AI:
                         return move_sequence, best_score
                     
                     # Update alpha - upper bound
-                    if new_score > alpha:
-                        alpha = new_score
+                    if best_score > alpha:
+                        alpha = best_score
                 # return the best of the results
                 # self.check_against_best(best_move, best_score, depth_pos, True)
                 move_sequence.append(best_move)
@@ -530,13 +471,13 @@ class AI:
                         best_score, best_move = new_score, move
 
                     # Check whether the new score is better than the alpha. If it is, return and break the loop
-                    if new_score <= alpha:
+                    if best_score <= alpha:
                         # self.check_against_best(best_move, best_score, depth_pos, False)
                         move_sequence.append(best_move)
                         return move_sequence, best_score
 
                     # update beta - lower bound
-                    if new_score < beta:
+                    if best_score < beta:
                         # print("xxxx")
                         beta = new_score
 
@@ -546,32 +487,31 @@ class AI:
                 return move_sequence, best_score
 
 
-    def total_leaves(self):
-        leaves = self.leaves_reached
-        self.leaves_reached = 0
-        return leaves
 
     def calculate_ab(self, fen):
-        
         
         self.board.set_fen(fen)
         maximiser = self.board.turn
         
-        
         start_time = time.time()
         move_sequence, best_score = self.alpha_beta(self.maxDepth, None, -numpy.inf, numpy.inf, None, maximiser)
-        print(self.total_leaves())
+
         for i in range(1, len(move_sequence)):
             print(f'move {move_sequence[-i]}', end=' ')
+            
         print("Time taken:", time.time() - start_time)
         print(f'score: {best_score}')
         
         move = move_sequence[-1]
         piece = self.board.piece_at(move.from_square)
+        
+        if self.board.is_capture(move):
+            pass
         # middle game
         if piece == 'B' or piece == 'N':
             self.WHITE_BISHOP_OR_KNIGHT_MOVE = True
         elif piece == 'b' or piece == 'n':
             self.BLACK_BISHOP_OR_KNIGHT_MOVE = True
             
+        # print(move)
         return move

@@ -11,21 +11,21 @@ board.push_san("h5")
 
 
 engine = AI(5, board) 
-print(engine.eval())
+# print(engine.eval())
 # print(board.turn)
 
 
-print(board)
 
-print(board.piece_at(5))
-print(board.piece_at(5).piece_type)
-print(board.piece_at(5).color)
+
+print(board.piece_at(2))
+print(board.piece_at(2).piece_type)
+print(board.piece_at(2).color)
 print(chess.BISHOP)
 
 
 # for pawn in chess.Pawns(board):
 #     print(pawn)
-# print(engine.position_eval())
+print(engine.piece_eval(2, board.piece_at(2)))
 
 # board.pieces(1, chess.WHITE)
 # def evaluate_pawn_structure(board):

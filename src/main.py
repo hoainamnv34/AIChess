@@ -24,14 +24,6 @@ class Main:
         dragger = self.game.dragger
         board = game.board
         
-
-        # test
-        
-        
-         
-        # Qb3 Qf6
-        # e5 Qg6
-        # Re1 Nge7
         
         engine = AI(3) 
           
@@ -81,6 +73,7 @@ class Main:
                 try:
                     # engine2 = Engine2(board, 4)
                     # board.push(engine2.engine(None, 0))
+            
                     board.push(engine.calculate_ab(board.fen()))
         
 
@@ -174,8 +167,6 @@ class Main:
                 #click release
                 elif event.type == pygame.MOUSEBUTTONUP :
                     
-                    
-        
                     initial = Const.colRowToIndex(dragger.initial)
                     released = Const.colRowToIndex(dragger.mouse_square)
                     
@@ -184,27 +175,30 @@ class Main:
                     
                     try:
                         move = chess.Move.from_uci(from_square + to_square)
+                        
+                   
+                        if move in game.legal_move_from_square():
+                            game.play_sound(board.is_capture(move))
+                            board.push(move)
+                            play = True
+                        
+                        #pawn promotion
+                        try:
+                            move = chess.Move.from_uci(from_square + to_square + 'q')
+                        except:
+                            pass
+                        
+                        if move in game.legal_move_from_square():
+
+                            # #en passant capture
+                            game.play_sound(True)
+                            board.push(move)
+                            play = True
+                            
+
                     except:
                         move = None
                         print('exception')
-                    
-                    if move in game.legal_move_from_square():
-                        game.play_sound(board.is_capture(move))
-                        board.push(move)
-                        play = True
-                       
-                    #pawn promotion
-                    try:
-                        move = chess.Move.from_uci(from_square + to_square + 'q')
-                    except:
-                        pass
-                    
-                    if move in game.legal_move_from_square():
-
-                        # #en passant capture
-                        game.play_sound(True)
-                        board.push(move)
-                        play = True
                         
                     dragger.undrag_piece()
                     bt = True

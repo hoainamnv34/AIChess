@@ -1,7 +1,15 @@
 import chess
 from ai import AI
-board = chess.Board('4kb2/8/8/8/8/8/3P4/4K3 w - - 0 1')
+board = chess.Board('r2k4/pp1ppp1P/8/8/8/5N2/PPPP1P2/RNBQKB1R w - - 0 1')
 
+move = list(board.legal_moves)
+
+print(move)
+
+
+print(board.is_capture(move[7]))
+
+board.push_uci("h7h8r")
 
 print(board)
 
@@ -36,15 +44,16 @@ print(board)
 # else:
 #   print("Black does not have the right to castle queenside")
 
-k = AI(5, board)
-print(board.turn)
 
-print(k.mobility_eval())
+# print(board.turn)
+
+# print(k.mobility_eval())
+# print(k.piece_eval())
 # # print(board.piece_at(chess.parse_square('h7')))
 # print(board.legal_moves)
 # board.push_san('Kf2')
 # print(board)
-print(board.turn)
+# print(board.turn)
 # print(chess.WHITE)
 # print(k.eval())
 # square = 1
