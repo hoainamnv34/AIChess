@@ -15,10 +15,6 @@ class Game:
         self.dragger = Dragger()
         self.config = Config()
     
-
-    # def is_promotion(self, move):
-    #     return self.board.piece_at(move.from_square).piece_type == chess.PAWN and chess.rank_index(move.to_square) in [0, 7]
-    
     
     def __set_texture(self, piece, size = 80):
         color = 'white' if piece.color else 'black'
@@ -126,7 +122,6 @@ class Game:
     def show_last_move(self, surface):
         theme = self.config.theme
         
-        
         if len(self.board.move_stack) > 0:
             last_move = self.board.peek()
             
@@ -135,7 +130,7 @@ class Game:
             
             for pos in (initial, final):
                 col , row = Const.indexToColRow(pos)
-                color = theme.trace.light if (row + col) % 2 == 0 else theme.trace.light
+                color = theme.trace.light if (row + col) % 2 == 0 else theme.trace.dark
                 rect = pygame.Rect(col*SQSIZE, row*SQSIZE, SQSIZE, SQSIZE)
                 pygame.draw.rect(surface, color, rect)
                 
@@ -151,13 +146,6 @@ class Game:
             self.board.pop()
             self.board.pop()
                      
-          
-    def show_end_game(self, surface):
-        bg_color = '#30313403'
-        pygame.draw.rect(surface, bg_color, (0, 0, 800, 800))
-        color = (255,255,255)
-        rect = pygame.Rect( WIDTH//2 - 300, HEIGH//2 - 200, 600, 400)
-        pygame.draw.rect(surface, color, rect)
                 
     def change_theme(self):
         self.config.change_theme()

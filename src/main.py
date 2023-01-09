@@ -2,9 +2,7 @@ import pygame
 import sys
 from game import *
 from const import *
-from time import sleep, time
-from ChessEngine import Engine2
-from chess_engine import Engine
+from time import time
 from ai import AI
 import time
 class Main:
@@ -14,6 +12,7 @@ class Main:
         pygame.display.set_caption('Chess') 
         self.game = Game()
         self.clock = pygame.time.Clock()
+        self.engine = AI(3) 
         
     
     def mainloop(self):
@@ -23,16 +22,11 @@ class Main:
         screen = self.screen
         dragger = self.game.dragger
         board = game.board
-        
-        
-        engine = AI(3) 
           
         running = True
+        player = True
         
-        play = False
-        
-        
-        
+    
         while running:
             self.clock.tick(100)
             game.show_bg(screen)
@@ -51,82 +45,25 @@ class Main:
             game.show_pieces(screen)
             
             
-            # if not play:
-    
-            #     pygame.display.flip()
-                
-            #     try:
-            #         # engine1 = Engine(board.fen())
-            #         # board.push(engine1.calculate_ab(4))
-            #         # board.push(engine.calculate_ab(board.fen()))
-
-            #     except:
-            #         print("xxxx")
-                
-                
-            #     play = True
             
-            if play:
-                # engine = ChessEngine.Engine(board, 3) 
-                # board.push(engine.getBestMove())
+            
+            if not player:
                 pygame.display.flip()
                 try:
-                    # engine2 = Engine2(board, 4)
-                    # board.push(engine2.engine(None, 0))
             
-                    board.push(engine.calculate_ab(board.fen()))
-        
+                    board.push(self.engine.calculate_ab(board.fen()))
 
                 except:
-                    print("except")
-                play = False
+                    print("exception")
+                player = True
             
             
             if(dragger.draggging):
-                # print('yes')
                 game.update_blit(screen)
             
             
-            # game.show_pieces(screen)
-            
-            
-            # time.sleep(5)
-            
-            # if play:
-            #     # engine = ChessEngine.Engine(board, 3) 
-            #     # board.push(engine.getBestMove())
-                
-            #     engine = AI(board, 4)
-            #     try:
-            #         board.push(engine.calculate_ab())
-
-            #     except:
-            #         print("xxxx")
-            #     play = False
-            
-            
-            # while time.time() - km < 5:
-            #     pass
-            
-            # game.show_bg(screen)
-            # game.show_pieces(screen)
-            
-            
-            # while not play:
-                
-            #     engine = AI(board, 1)
-            #     try:
-            #         board.push(engine.calculate_ab(1))
-
-            #     except:
-            #         print("xxxx")
-                    
-            #     # engine = ChessEngine.Engine(board, 3) 
-            #     # board.push(engine.getBestMove())
-            #     play = True
-        
             if board.is_game_over():
-                time.sleep(2)
+                time.sleep(3)
                 running = False
                 print(board.result())    
                  
@@ -137,7 +74,6 @@ class Main:
                     # print('click {}'.format(event.pos))
                     print(dragger.mouse_square)
                     
-                    
                     if board.piece_at(Const.colRowToIndex(dragger.mouse_square)):
                         
                         dragger.save_initial(event.pos)
@@ -147,11 +83,9 @@ class Main:
                         piece = board.piece_at(pos)
                         
                         # print(chess.piece_name(piece.piece_type))
-                        
                         dragger.drag_piece(piece)
         
-    
-        
+
                 #mouse motion
                 elif event.type == pygame.MOUSEMOTION:
                     motion = event.pos
@@ -161,8 +95,6 @@ class Main:
                         dragger.update_mouse(event.pos) 
                         game.update_blit(screen)
 
-                        
-                        # print('den day')
                 
                 #click release
                 elif event.type == pygame.MOUSEBUTTONUP :
@@ -180,7 +112,7 @@ class Main:
                         if move in game.legal_move_from_square():
                             game.play_sound(board.is_capture(move))
                             board.push(move)
-                            play = True
+                            player = False
                         
                         #pawn promotion
                         try:
@@ -193,7 +125,7 @@ class Main:
                             # #en passant capture
                             game.play_sound(True)
                             board.push(move)
-                            play = True
+                            player = False
                             
 
                     except:
@@ -201,10 +133,7 @@ class Main:
                         print('exception')
                         
                     dragger.undrag_piece()
-                    bt = True
                     game.show_pieces(screen)
-                    
-                                    
                     
                 # key press
                 if event.type == pygame.KEYDOWN:
@@ -226,32 +155,7 @@ class Main:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                    
-                    
-            # game.show_pieces(screen)
-            # pygame.display.update()
-            
-            
-            # if bt:
-            #     k = input("hellloo")
-                  
-                        
-                        
-            # game.show_pieces(screen)
-            
-            # while play:
-            #     # engine = ChessEngine.Engine(board, 3) 
-            #     # board.push(engine.getBestMove())
-                
-            #     engine = AI(board, 4)
-            #     try:
-            #         board.push(engine.calculate_ab(4))
-
-            #     except:
-            #         print("xxxx")
-            #     play = False            
-            
-            # pygame.display.update()
+        
             pygame.display.flip()
                     
 main = Main()

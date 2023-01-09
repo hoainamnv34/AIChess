@@ -1,10 +1,7 @@
 import chess
-import random
 import numpy
 import time
 from const import Const
-
-
 
 
 class AI:
@@ -386,13 +383,12 @@ class AI:
         squares = chess.SquareSet(occupied_squares)
         for square in squares:
             piece = self.board.piece_at(square)
-            score += (self.material_eval(piece) 
+            score += (1.02*self.material_eval(piece) 
                       + self.piece_square_eval(square,piece, piece_count)
                       + self.piece_eval(square, piece)
                       
             )
         score += self.mobility_eval()
-        score += 0.001*random.random()
 
         return score
     
@@ -485,7 +481,6 @@ class AI:
                 # self.check_against_best(best_move, best_score, depth_pos, False)
                 move_sequence.append(best_move)
                 return move_sequence, best_score
-
 
 
     def calculate_ab(self, fen):
