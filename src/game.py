@@ -76,7 +76,6 @@ class Game:
                     
     
     def show_pieces(self, surface):
-       
         for row in range(ROWS):
             for col in range(COLS):
                 pos = Const.colRowToIndex((col,row))

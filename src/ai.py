@@ -124,18 +124,10 @@ class AI:
         self.BAD_BISHOP_PENALTY = 10
         self.KING_HAS_CASTLING_RIGHT_BUNUS = 10
         
-        
-        #opening game
+        #opening game - Khai cuộc 
         self.WHITE_BISHOP_OR_KNIGHT_MOVE = False
         self.BLACK_BISHOP_OR_KNIGHT_MOVE = False
         
-        
-        self.leaves_reached = 0
-        
-        #is last move capture
-        self.is_last_move_capture = True
-        self.last_meterial_eval = 0
-        self.last_piece_count = 0
         
 
     
@@ -200,8 +192,7 @@ class AI:
         # With pawn piece
         if i == chess.PAWN:
         # Pawn Structure
-            
-                
+        
             # Check if the pawn is isolated
             is_isolated = True
             for adjacent_file in adjacent_files:
@@ -383,7 +374,7 @@ class AI:
         squares = chess.SquareSet(occupied_squares)
         for square in squares:
             piece = self.board.piece_at(square)
-            score += (1.02*self.material_eval(piece) 
+            score += (1.02*self.material_eval(piece)
                       + self.piece_square_eval(square,piece, piece_count)
                       + self.piece_eval(square, piece)
                       
@@ -393,8 +384,7 @@ class AI:
         return score
     
                           
-    def alpha_beta(self, depth, move, alpha, beta, prev_moves, maximiser):
-
+    def alpha_beta(self, depth, move, alpha, beta, maximiser):
             move_sequence = []
             if depth == 0:
                 move_sequence.append(move)
@@ -415,70 +405,50 @@ class AI:
                     move_sequence.append(move)
                     return move_sequence, 0
 
-
             # initialise best move variables. What are these used for again? I need to simplify the logic here.
             best_move = None
             best_score = -numpy.inf if maximiser else numpy.inf
  
-
             if maximiser:
                 for move in moves:
-                    
-            
-                    self.leaves_reached += 1
 
-                    # get score of the new move, record what it is
                     self.board.push(move)
-                    new_sequence, new_score = self.alpha_beta(depth - 1, move, alpha, beta, prev_moves, False)
+                    new_sequence, new_score = self.alpha_beta(depth - 1, move, alpha, beta, False)
                     self.board.pop()
                     
-                    # Check whether the new score is better than the best score. If so, replace the best score.
                     if new_score > best_score:
                         move_sequence = new_sequence
                         best_score, best_move = new_score, move
 
-                    # Check whether the new score is better than the beta. If it is, return and break the loop.
-                    # Need to rethink the check against best here.
                     if best_score >= beta:
-                        # self.check_against_best(best_move, best_score, depth_pos, True)
                         move_sequence.append(best_move)
                         return move_sequence, best_score
                     
-                    # Update alpha - upper bound
+        
                     if best_score > alpha:
                         alpha = best_score
-                # return the best of the results
-                # self.check_against_best(best_move, best_score, depth_pos, True)
+               
                 move_sequence.append(best_move)
                 return move_sequence, best_score
 
             else:
                 for move in moves:
-                    self.leaves_reached += 1
 
-                    # get score of the new move, record what it is
                     self.board.push(move)
-                    new_sequence, new_score = self.alpha_beta(depth - 1, move, alpha, beta, prev_moves, True)
+                    new_sequence, new_score = self.alpha_beta(depth - 1, move, alpha, beta, True)
                     self.board.pop()
 
-                    # Check whether the new score is better than the best score. If so, replace the best score.
                     if new_score < best_score:
                         move_sequence = new_sequence
                         best_score, best_move = new_score, move
 
-                    # Check whether the new score is better than the alpha. If it is, return and break the loop
                     if best_score <= alpha:
-                        # self.check_against_best(best_move, best_score, depth_pos, False)
                         move_sequence.append(best_move)
                         return move_sequence, best_score
 
-                    # update beta - lower bound
                     if best_score < beta:
-                        # print("xxxx")
                         beta = new_score
 
-                # return the best of the results
-                # self.check_against_best(best_move, best_score, depth_pos, False)
                 move_sequence.append(best_move)
                 return move_sequence, best_score
 
@@ -488,8 +458,9 @@ class AI:
         self.board.set_fen(fen)
         maximiser = self.board.turn
         
+        
         start_time = time.time()
-        move_sequence, best_score = self.alpha_beta(self.maxDepth, None, -numpy.inf, numpy.inf, None, maximiser)
+        move_sequence, best_score = self.alpha_beta(self.maxDepth, None, -numpy.inf, numpy.inf, maximiser)
 
         for i in range(1, len(move_sequence)):
             print(f'move {move_sequence[-i]}', end=' ')
@@ -508,5 +479,4 @@ class AI:
         elif piece == 'b' or piece == 'n':
             self.BLACK_BISHOP_OR_KNIGHT_MOVE = True
             
-        # print(move)
         return move

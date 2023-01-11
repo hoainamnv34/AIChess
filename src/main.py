@@ -14,6 +14,7 @@ class Main:
         self.clock = pygame.time.Clock()
         self.engine = AI(3) 
         
+        
     
     def mainloop(self):
         
@@ -50,9 +51,8 @@ class Main:
             if not player:
                 pygame.display.flip()
                 try:
-            
                     board.push(self.engine.calculate_ab(board.fen()))
-
+                    print(board.fen())
                 except:
                     print("exception")
                 player = True
